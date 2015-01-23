@@ -13,16 +13,27 @@ app.get('/', function (req, res){
 })
     .post('/rpc', function (req, res){
         var body = req.body;
+        var respond = function(err, results){
+            if (err){
+                res.send(JSON.stringify(err));
+            }
+            else {
+                res.send(JSON.stringify(results));
+            }
+        };
+
         res.set('Content-type', 'application/JSON');
         switch (body.action) {
             case "getMovies" :
-                db.movies.find({}, function(err, results){
-                   if (err){
-                       res.send(JSON.stringify(err));
-                   }
-                    else{
-                     res.send(JSON.stringify(results));
-                   };
+                db.movies.find({},respond);
+                break;
+            case "addMovie" :
+                db.movies.insert({title: body.title}, respond);
+                break;
+            case "rateMovie":
+                db.movies.update({title: body.title}, {$set: {rating: body.rating}
+                }, function(err, num){
+                    respond(err,{success: num + "records update"})
                 });
                 break;
             default:
